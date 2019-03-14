@@ -41,29 +41,13 @@ namespace BotWebApi.Controllers
         [HttpPost("/api/Products/ProductByCategorie", Name = "ProductByCategorie")]
         public async Task<List<Product>> ProductByCategorie([FromBody] ProductState product)
         {
-            
-            if (product.PriceMin != 0 && product.PriceMax != 0)
+            if(product.PriceMax == 0)
             {
-                return await _context.Products
-                 .Where(p => p.Brand.Contains(product.Categorie) && p.Price>product.PriceMin && p.Price<product.PriceMax)
+                product.PriceMax = int.MaxValue;
+            }
+            return await _context.Products
+                 .Where(p => p.Brand.Contains(product.Categorie) && p.Price > product.PriceMin && p.Price < product.PriceMax)
                  .ToListAsync();
-            }
-            else
-            {
-                if (product.PriceMax == 0)
-                {
-                    return await _context.Products
-                .Where(p => p.Brand.Contains(product.Categorie) && p.Price>product.PriceMin)
-                .ToListAsync();
-                }
-                else
-                {
-                    return await _context.Products
-                                    .Where(p => p.Brand.Contains(product.Categorie) && p.Price<product.PriceMax)
-                                    .ToListAsync();
-                }
-            }
-
         }
 
         private bool ProductExists(int id)
