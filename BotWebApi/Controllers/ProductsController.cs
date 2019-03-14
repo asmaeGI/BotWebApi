@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BotWebApi.Model;
+using BotWebApi.ModelState;
 
 namespace BotWebApi.Controllers
 {
@@ -38,11 +39,31 @@ namespace BotWebApi.Controllers
         
         //GET: api/Products/
         [HttpPost("/api/Products/ProductByCategorie", Name = "ProductByCategorie")]
-        public async Task<List<Product>> ProductByCategorie([FromBody] Product product)
+        public async Task<List<Product>> ProductByCategorie([FromBody] ProductState product)
         {
-            return await _context.Products
-                .Where(p => p.Brand.Contains(product.Brand))
-                .ToListAsync(); 
+            
+            if (product.PriceMin != 0 && product.PriceMax != 0)
+            {
+                return await _context.Products
+                 .Where(p => p.Brand.Contains(product.Categorie) && p.Price>product.PriceMin && p.Price<product.PriceMax)
+                 .ToListAsync();
+            }
+            else
+            {
+                if (product.PriceMax == 0)
+                {
+                    return await _context.Products
+                .Where(p => p.Brand.Contains(product.Categorie) && p.Price>product.PriceMin)
+                .ToListAsync();
+                }
+                else
+                {
+                    return await _context.Products
+                                    .Where(p => p.Brand.Contains(product.Categorie) && p.Price<product.PriceMax)
+                                    .ToListAsync();
+                }
+            }
+
         }
 
         private bool ProductExists(int id)
